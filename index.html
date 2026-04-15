@@ -14,7 +14,7 @@
             --mobile-gap: 15px;
             --base-font-size: 11px;
             --base-line-height: 1.6;
-            --global-radius: 12px; /* 圆角大小修改为 12PX */
+            --global-radius: 12px; 
         }
 
         body, html {
@@ -58,18 +58,27 @@
             color: #fff;
             font-size: var(--base-font-size);
             letter-spacing: 0.05em;
-            transition: color 0.5s ease, opacity 0.5s ease;
+            transition: color 0.5s ease, opacity 0.5s ease, filter 0.5s ease;
             line-height: var(--base-line-height);
         }
 
+        /* 档案页激活时的样式 */
         body.profile-active .ui-text {
             mix-blend-mode: normal;
             color: #000;
         }
 
+        /* 强制白色（针对深色背景且不适合混合模式的页面） */
         body.force-white .ui-text {
             mix-blend-mode: normal;
             color: #ffffff;
+        }
+
+        /* 强制反色：用于第五页白色背景但需要白色文字的需求 */
+        body.force-invert .ui-text {
+            mix-blend-mode: normal;
+            color: #000; /* 先设为黑 */
+            filter: invert(1); /* 彻底反转为白 */
         }
 
         .bottom-left-area {
@@ -365,7 +374,8 @@
             const targetColor = data.bgColor || "#000000";
             currentSection.style.backgroundColor = targetColor;
             
-            body.classList.remove('profile-active', 'force-white');
+            // 重置所有特殊类名
+            body.classList.remove('profile-active', 'force-white', 'force-invert');
 
             const pageNum = (index + 1).toString().padStart(2, '0');
             const totalNum = sections.length.toString().padStart(2, '0');
@@ -375,7 +385,12 @@
                 leftContainer.innerHTML = `<div style="max-width: 420px; text-transform: none; text-align: left;">${data.content}</div>`;
                 rightContainer.innerHTML = ''; 
             } else {
-                if (index === 3 || targetColor === "#ffffff") body.classList.add('force-white');
+                // 特殊处理：第五页 (index 4) 使用反色
+                if (index === 4) {
+                    body.classList.add('force-invert');
+                } else if (index === 3 || targetColor === "#ffffff") {
+                    body.classList.add('force-white');
+                }
                 
                 if (data.customLabels) {
                     leftContainer.innerHTML = data.customLabels.map(line => `<div>${line}</div>`).join('');
