@@ -22,11 +22,12 @@
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden; 
             background-color: var(--bg-dark);
-            /* 使用 dvh 确保在移动端动态适配工具栏，解决黑边问题 */
             height: 100vh;
             height: 100dvh;
             width: 100vw;
-            position: fixed; /* 防止 iOS 橡皮筋回弹效果 */
+            position: fixed; 
+            /* 背景颜色切换平滑动画 */
+            transition: background-color 0.8s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         /* 通用底部文字样式 */
@@ -83,7 +84,6 @@
         .page-wrapper {
             position: relative;
             width: 100vw;
-            height: 100vh;
             height: 100dvh;
             overflow: hidden;
         }
@@ -93,14 +93,13 @@
             top: 0;
             left: 0;
             width: 100vw;
-            height: 100vh;
             height: 100dvh;
             transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s;
             will-change: transform, opacity;
             overflow: hidden;
-            background-color: #000;
+            /* 移除固定的黑色背景，允许继承 body 的动态背景色 */
+            background-color: transparent;
             opacity: 0;
-            /* 初始状态不使用 scale，避免视觉缝隙，改用纯位移或透明度 */
             transform: translateY(0); 
             z-index: 1;
             pointer-events: none;
@@ -132,6 +131,7 @@
             overflow: hidden;
         }
 
+        /* 第五页特殊的间距页保持纯白 */
         #sec-1-replicated .video-container {
             padding: 60px; 
             background-color: #ffffff; 
@@ -306,18 +306,19 @@
         ];
         
         const projectData = [
-            { name: "LNM250M SMART BREAKER", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "SYNC_RUNNING_01" },
-            { name: "ONIBI ARCHIVE 01", type: "Portfolio Collection / Concept", team: "Author: DESIGN LAB", status: "v19.0.0-ALIGNED" },
-            { name: "EXPERIMENTAL MOTION", type: "Visual Research / 3D Animation", team: "Author: DESIGN LAB", status: "SYNC_RUNNING_02" },
-            { name: "STOOL DESIGN STUDY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02" },
-            { name: "LNM250M REPLICA", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "v19.1.0-CENTERED" },
-            { name: "STOOL DESIGN STUDY (II)", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT" },
-            { name: "STOOL DESIGN STUDY (II) COPY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT_REP" },
-            { name: "ARCHIVE VISUALIZATION I", type: "Still Image / Product Render", team: "Author: DESIGN LAB", status: "STATIC_RENDER_01" },
-            { name: "REMOTE RENDERING SYSTEM", type: "Technical Archive / Visualization", team: "Author: DESIGN LAB", status: "STATIC_RENDER_03" },
-            { name: "FUTURE INTERFACE STUDY", type: "UI/UX / Interaction Concept", team: "Author: DESIGN LAB", status: "SYSTEM_IDLE_01" },
+            { name: "LNM250M SMART BREAKER", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "SYNC_RUNNING_01", bgColor: "#0a0a0a" },
+            { name: "ONIBI ARCHIVE 01", type: "Portfolio Collection / Concept", team: "Author: DESIGN LAB", status: "v19.0.0-ALIGNED", bgColor: "#1a1a1a" },
+            { name: "EXPERIMENTAL MOTION", type: "Visual Research / 3D Animation", team: "Author: DESIGN LAB", status: "SYNC_RUNNING_02", bgColor: "#050505" },
+            { name: "STOOL DESIGN STUDY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02", bgColor: "#222222" },
+            { name: "LNM250M REPLICA", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "v19.1.0-CENTERED", bgColor: "#ffffff" },
+            { name: "STOOL DESIGN STUDY (II)", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT", bgColor: "#121212" },
+            { name: "STOOL DESIGN STUDY (II) COPY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT_REP", bgColor: "#0d0d0d" },
+            { name: "ARCHIVE VISUALIZATION I", type: "Still Image / Product Render", team: "Author: DESIGN LAB", status: "STATIC_RENDER_01", bgColor: "#1f1f1f" },
+            { name: "REMOTE RENDERING SYSTEM", type: "Technical Archive / Visualization", team: "Author: DESIGN LAB", status: "STATIC_RENDER_03", bgColor: "#141414" },
+            { name: "FUTURE INTERFACE STUDY", type: "UI/UX / Interaction Concept", team: "Author: DESIGN LAB", status: "SYSTEM_IDLE_01", bgColor: "#000000" },
             { 
                 isProfile: true,
+                bgColor: "#ffffff",
                 content: `Wencheng Zhang is a multi-award-winning industrial designer who has a passion for industrial design and excels at archetype-level creation. Currently based in Shanghai.`
             }
         ];
@@ -326,6 +327,9 @@
             const data = projectData[index];
             const body = document.getElementById('main-body');
             const profileLink = document.getElementById('profile-link');
+            
+            // 动态切换背景颜色
+            body.style.backgroundColor = data.bgColor || "#000000";
             
             body.classList.remove('profile-active', 'force-white');
 
@@ -415,7 +419,6 @@
 
         document.addEventListener('click', () => playVideo(currentIndex), { once: true });
         
-        // 禁止移动端的下拉刷新
         document.addEventListener('touchmove', function(e) {
             if (e.touches.length > 1) return;
             e.preventDefault();
