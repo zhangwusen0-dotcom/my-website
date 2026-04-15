@@ -11,9 +11,10 @@
         :root {
             --bg-dark: #000000;
             --desktop-gap: 40px;
-            --mobile-gap: 25px;
+            --mobile-gap: 20px;
             --base-font-size: 11px;
             --base-line-height: 1.6;
+            --mobile-radius: 14px;
         }
 
         body, html {
@@ -26,10 +27,28 @@
             height: 100dvh;
             width: 100vw;
             position: fixed; 
-            transition: background-color 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: background-color 0.8s cubic-bezier(0.65, 0, 0.35, 1);
         }
 
-        /* 通用底部文字样式 */
+        /* 全局裁剪容器 */
+        .page-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            .page-wrapper {
+                border-radius: var(--mobile-radius);
+                mask-image: radial-gradient(circle, white 100%, black 100%);
+                -webkit-mask-image: -webkit-radial-gradient(white, black);
+                overflow: hidden;
+                transform: translateZ(0); 
+            }
+        }
+
         .ui-text {
             position: fixed;
             z-index: 1000;
@@ -39,6 +58,7 @@
             letter-spacing: 0.05em;
             transition: color 0.5s ease, opacity 0.5s ease;
             line-height: var(--base-line-height);
+            word-wrap: break-word; /* 确保长单词或内容可以折行 */
         }
 
         body.profile-active .ui-text {
@@ -51,20 +71,22 @@
             color: #ffffff;
         }
 
-        /* 左侧对齐容器 */
+        /* 左下角区域 */
         .bottom-left-area {
             left: var(--desktop-gap);
             bottom: var(--desktop-gap);
             text-align: left;
             pointer-events: none;
+            max-width: 400px;
         }
 
-        /* 右侧对称容器 */
+        /* 右下角区域 */
         .bottom-right-area {
             right: var(--desktop-gap);
             bottom: var(--desktop-gap);
             text-align: right;
             pointer-events: none;
+            max-width: 300px;
         }
 
         .brand-link {
@@ -79,40 +101,22 @@
             opacity: 0.7;
         }
 
-        .page-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100dvh;
-            overflow: hidden;
+        .scroll-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            will-change: transform;
         }
 
         .section {
-            position: absolute;
-            top: 0;
-            left: 0;
+            flex-shrink: 0;
             width: 100vw;
             height: 100dvh;
-            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s;
-            will-change: transform, opacity;
+            position: relative;
             overflow: hidden;
             background-color: transparent;
-            opacity: 0;
-            transform: translateY(0); 
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .section.active {
-            opacity: 1;
-            transform: translateY(0);
-            z-index: 10;
-            pointer-events: auto;
-        }
-
-        .section.inactive {
-            opacity: 0;
-            z-index: 1;
-            pointer-events: none;
         }
 
         #sec-profile {
@@ -129,19 +133,18 @@
         }
 
         #sec-1-replicated .video-container {
-            padding: 60px; 
             background-color: #ffffff; 
-            box-sizing: border-box;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        #sec-1-replicated .bg-asset {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+        #sec-1-replicated .video-sub-container {
+            width: 80%; 
+            height: 80%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .bg-asset {
@@ -188,140 +191,164 @@
                 --base-font-size: 9px;
             }
             .bottom-left-area {
-                left: 20px;
-                bottom: var(--mobile-gap);
+                left: var(--mobile-gap) !important; 
+                bottom: var(--mobile-gap) !important;
+                max-width: 48% !important; /* 限制宽度，防止重叠 */
             }
             .bottom-right-area {
-                right: 20px;
-                bottom: var(--mobile-gap);
+                right: var(--mobile-gap) !important;
+                bottom: var(--mobile-gap) !important;
+                max-width: 48% !important; /* 限制宽度，防止重叠 */
             }
-            #sec-1-replicated .video-container {
-                padding: 30px; 
+            #sec-1-replicated .video-sub-container {
+                width: 70%; 
+                height: 70%;
             }
         }
     </style>
 </head>
 <body id="main-body">
 
-    <!-- 左侧对称 UI -->
+    <!-- UI 文字层 -->
     <div class="bottom-left-area ui-text" id="label-left"></div>
-
-    <!-- 右侧对称 UI -->
     <div class="bottom-right-area ui-text" id="label-right"></div>
 
     <div class="page-wrapper" id="page-wrapper">
-        <!-- 01: 首页 (包含设备自适应视频) -->
-        <section class="section active" id="sec-1">
-            <div class="top-overlay"></div>
-            <div class="video-container">
-                <!-- ID 为 hero-video，src 将通过 JS 根据设备类型加载 -->
-                <video id="hero-video" class="bg-asset" muted loop playsinline preload="auto">
-                    您的浏览器不支持 HTML5 视频。
-                </video>
-            </div>
-        </section>
+        <div class="scroll-container" id="scroll-container">
+            <!-- 01 -->
+            <section class="section" id="sec-1">
+                <div class="top-overlay"></div>
+                <div class="video-container">
+                    <video id="hero-video" class="bg-asset" muted loop playsinline preload="auto"></video>
+                </div>
+            </section>
 
-        <!-- 02 -->
-        <section class="section" id="sec-2">
-            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/lazzen-if-gold.jpg');"></div>
-        </section>
+            <!-- 02 -->
+            <section class="section" id="sec-2">
+                <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/lazzen-if-gold.jpg');"></div>
+            </section>
 
-        <!-- 03 -->
-        <section class="section" id="sec-3">
-            <div class="top-overlay"></div>
-            <div class="video-container">
-                <video class="bg-asset" muted loop playsinline preload="auto">
-                    <source src="https://img.wusen.me/lazzen-video/2-p.mp4" type="video/mp4">
-                </video>
-            </div>
-        </section>
+            <!-- 03 -->
+            <section class="section" id="sec-3">
+                <div class="top-overlay"></div>
+                <div class="video-container">
+                    <video class="bg-asset" muted loop playsinline preload="auto">
+                        <source src="https://img.wusen.me/lazzen-video/2-p.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </section>
 
-        <!-- 04 -->
-        <section class="section" id="sec-4">
-            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9816-compressed.jpg');"></div>
-        </section>
+            <!-- 04 -->
+            <section class="section" id="sec-4">
+                <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9816-compressed.jpg');"></div>
+            </section>
 
-        <!-- 05 -->
-        <section class="section" id="sec-1-replicated">
-            <div class="video-container">
-                <video class="bg-asset" muted loop playsinline preload="auto">
-                    <source src="https://img.wusen.me/lazzen-video/walkman.mp4" type="video/mp4">
-                </video>
-            </div>
-        </section>
+            <!-- 05 -->
+            <section class="section" id="sec-1-replicated">
+                <div class="video-container">
+                    <div class="video-sub-container">
+                        <video class="bg-asset" muted loop playsinline preload="auto">
+                            <source src="https://img.wusen.me/lazzen-video/walkman.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </section>
 
-        <!-- 06 -->
-        <section class="section" id="sec-4-copy">
-            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9805-compressed4.jpg');"></div>
-        </section>
+            <!-- 06 -->
+            <section class="section" id="sec-4-copy">
+                <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9805-compressed4.jpg');"></div>
+            </section>
 
-        <!-- 07 -->
-        <section class="section" id="sec-4-copy-replicated">
-            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_1428-compressed.jpg');"></div>
-        </section>
+            <!-- 07 -->
+            <section class="section" id="sec-4-copy-replicated">
+                <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_1428-compressed.jpg');"></div>
+            </section>
 
-        <!-- 08 -->
-        <section class="section" id="sec-5">
-            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/p6-leica-m-battery-charger-compressed2.jpg');"></div>
-        </section>
+            <!-- 08 -->
+            <section class="section" id="sec-5">
+                <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/p6-leica-m-battery-charger-compressed2.jpg');"></div>
+            </section>
 
-        <!-- 09 -->
-        <section class="section" id="sec-6">
-            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/buds-compressed3.jpg');"></div>
-        </section>
+            <!-- 09 -->
+            <section class="section" id="sec-6">
+                <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/buds-compressed3.jpg');"></div>
+            </section>
 
-        <!-- 10 -->
-        <section class="section" id="sec-8">
-            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/topfront-20comparisoncc.jpg');"></div>
-        </section>
+            <!-- 10 -->
+            <section class="section" id="sec-8">
+                <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/topfront-20comparisoncc.jpg');"></div>
+            </section>
 
-        <!-- 11 -->
-        <section class="section" id="sec-profile">
-        </section>
+            <!-- 11 -->
+            <section class="section" id="sec-profile">
+            </section>
+        </div>
     </div>
 
     <script>
-        // 第一页视频配置：分别为桌面端和移动端定义不同的源
         const HERO_VIDEO_CONFIG = {
-            desktop: "https://img.wusen.me/lazzen-video/1.mp4", // 桌面端视频源
-            mobile: "https://img.wusen.me/lazzen-video/1-p.mp4"  // 移动端视频源 (示例，您可以替换为专门的竖屏视频)
+            desktop: "https://img.wusen.me/lazzen-video/1.mp4",
+            mobile: "https://img.wusen.me/lazzen-video/2-p.mp4" 
         };
 
         function setupHeroVideo() {
             const videoEl = document.getElementById('hero-video');
+            if (!videoEl) return;
             const isMobile = window.innerWidth <= 768;
-            
-            // 根据设备选择链接
             const videoSrc = isMobile ? HERO_VIDEO_CONFIG.mobile : HERO_VIDEO_CONFIG.desktop;
             
-            // 避免重复设置相同的源
             if (videoEl.getAttribute('data-current-src') !== videoSrc) {
                 videoEl.innerHTML = `<source src="${videoSrc}" type="video/mp4">`;
                 videoEl.setAttribute('data-current-src', videoSrc);
-                videoEl.load(); // 重新加载视频源
+                videoEl.load();
+                if (currentIndex === 0) {
+                    videoEl.play().catch(e => {});
+                    videoEl.classList.add('visible');
+                }
             }
         }
 
         let currentIndex = 0;
-        const sections = [
-            document.getElementById('sec-1'),
-            document.getElementById('sec-2'),
-            document.getElementById('sec-3'),
-            document.getElementById('sec-4'),
-            document.getElementById('sec-1-replicated'),
-            document.getElementById('sec-4-copy'),
-            document.getElementById('sec-4-copy-replicated'),
-            document.getElementById('sec-5'),      
-            document.getElementById('sec-6'),
-            document.getElementById('sec-8'),
-            document.getElementById('sec-profile')
-        ];
+        const scrollContainer = document.getElementById('scroll-container');
+        const sections = Array.from(document.querySelectorAll('.section'));
         
         const projectData = [
-            { name: "LNM250M SMART BREAKER", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "SYNC_RUNNING_01", bgColor: "#0a0a0a" },
-            { name: "ONIBI ARCHIVE 01", type: "Portfolio Collection / Concept", team: "Author: DESIGN LAB", status: "v19.0.0-ALIGNED", bgColor: "#1a1a1a" },
-            { name: "EXPERIMENTAL MOTION", type: "Visual Research / 3D Animation", team: "Author: DESIGN LAB", status: "SYNC_RUNNING_02", bgColor: "#050505" },
-            { name: "STOOL DESIGN STUDY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02", bgColor: "#222222" },
+            { 
+                customLabels: [
+                    "PRODUCT: LAZZEN CIRCUIT BREAKER - 01",
+                    "TEAM ROLE: CREATIVE LEAD",
+                    "AWARD: iF GOLD AWARD",
+                    "STATUS: MASS PRODUCTION"
+                ],
+                bgColor: "#0a0a0a" 
+            },
+            { 
+                customLabels: [
+                    "PRODUCT: LAZZEN CIRCUIT BREAKER - 02",
+                    "TEAM ROLE: CREATIVE LEAD",
+                    "AWARD: iF GOLD AWARD",
+                    "STATUS: MASS PRODUCTION"
+                ],
+                bgColor: "#1a1a1a" 
+            },
+            { 
+                customLabels: [
+                    "PRODUCT: LAZZEN CIRCUIT BREAKER - 03",
+                    "TEAM ROLE: CREATIVE LEAD",
+                    "AWARD: iF GOLD AWARD",
+                    "STATUS: MASS PRODUCTION"
+                ],
+                bgColor: "#050505" 
+            },
+            { 
+                customLabels: [
+                    "Nagra SN, Walkman & TP-7 Inspired",
+                    "Music Player",
+                    "Personal Project",
+                    "Status: Under Development"
+                ],
+                bgColor: "#222222" 
+            },
             { name: "LNM250M REPLICA", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "v19.1.0-CENTERED", bgColor: "#ffffff" },
             { name: "STOOL DESIGN STUDY (II)", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT", bgColor: "#121212" },
             { name: "STOOL DESIGN STUDY (II) COPY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT_REP", bgColor: "#0d0d0d" },
@@ -341,7 +368,9 @@
             const leftContainer = document.getElementById('label-left');
             const rightContainer = document.getElementById('label-right');
             
-            body.style.backgroundColor = data.bgColor || "#000000";
+            const targetColor = data.bgColor || "#000000";
+            body.style.backgroundColor = targetColor;
+            
             body.classList.remove('profile-active', 'force-white');
 
             const pageNum = (index + 1).toString().padStart(2, '0');
@@ -349,19 +378,21 @@
 
             if (data.isProfile) {
                 body.classList.add('profile-active');
-                leftContainer.innerHTML = `
-                    <div style="max-width: 420px; text-transform: none; text-align: left;">${data.content}</div>
-                `;
+                leftContainer.innerHTML = `<div style="max-width: 420px; text-transform: none; text-align: left;">${data.content}</div>`;
                 rightContainer.innerHTML = ''; 
             } else {
-                if (index === 3) body.classList.add('force-white');
+                if (index === 3 || targetColor === "#ffffff") body.classList.add('force-white');
                 
-                leftContainer.innerHTML = `
-                    <div>PRODUCT: ${data.name}</div>
-                    <div>TYPE:    ${data.type}</div>
-                    <div>TEAM:    ${data.team}</div>
-                    <div>STATUS:  ${data.status}</div>
-                `;
+                if (data.customLabels) {
+                    leftContainer.innerHTML = data.customLabels.map(line => `<div>${line}</div>`).join('');
+                } else {
+                    leftContainer.innerHTML = `
+                        <div>PRODUCT: ${data.name}</div>
+                        <div>TYPE:    ${data.type}</div>
+                        <div>TEAM:    ${data.team}</div>
+                        <div>STATUS:  ${data.status}</div>
+                    `;
+                }
 
                 rightContainer.innerHTML = `
                     <a href="javascript:void(0)" class="brand-link" onclick="transitionTo(${sections.length - 1})">> WENCHENG ZHANG</a>
@@ -373,22 +404,19 @@
         }
 
         async function playVideo(index) {
-            sections.forEach(s => {
+            sections.forEach((s, i) => {
                 const v = s.querySelector('video');
                 if (v) {
-                    v.pause();
-                    v.classList.remove('visible');
-                    v.currentTime = 0;
+                    if (i === index) {
+                        v.currentTime = 0;
+                        v.play().catch(() => {});
+                        v.classList.add('visible');
+                    } else {
+                        v.pause();
+                        v.classList.remove('visible');
+                    }
                 }
             });
-
-            const activeVideo = sections[index].querySelector('video');
-            if (activeVideo) {
-                try {
-                    await activeVideo.play();
-                    activeVideo.classList.add('visible');
-                } catch (e) {}
-            }
         }
 
         let isLocked = false;
@@ -396,11 +424,9 @@
             if (isLocked || index < 0 || index >= sections.length || index === currentIndex) return;
             isLocked = true;
 
-            const prevIndex = currentIndex;
-            sections[prevIndex].classList.replace('active', 'inactive');
-            sections[index].classList.replace('inactive', 'active');
-
             currentIndex = index;
+            scrollContainer.style.transform = `translateY(-${index * 100}%)`;
+
             updateLabel(index);
             playVideo(index);
 
@@ -409,21 +435,18 @@
             }, 800);
         }
 
-        // 初始化
         setupHeroVideo();
-        sections.forEach((s, i) => {
-            if (i !== 0) s.classList.add('inactive');
-        });
-
         updateLabel(0);
         
-        window.addEventListener('load', () => playVideo(0));
-        
-        // 监听视口变化（例如手机横屏切换）
+        window.addEventListener('load', () => {
+            setupHeroVideo();
+            playVideo(0);
+        });
+
         window.addEventListener('resize', setupHeroVideo);
 
         window.addEventListener('wheel', e => {
-            if (Math.abs(e.deltaY) < 30) return;
+            if (isLocked || Math.abs(e.deltaY) < 30) return;
             transitionTo(e.deltaY > 0 ? currentIndex + 1 : currentIndex - 1);
         }, { passive: true });
 
@@ -434,11 +457,13 @@
             if (Math.abs(diff) > 50) transitionTo(diff > 0 ? currentIndex + 1 : currentIndex - 1);
         }, { passive: true });
 
-        document.addEventListener('click', () => playVideo(currentIndex), { once: true });
-        
-        document.addEventListener('touchmove', function(e) {
-            if (e.touches.length > 1) return;
-            e.preventDefault();
+        document.addEventListener('click', () => {
+            const v = sections[currentIndex].querySelector('video');
+            if (v) v.play();
+        }, { once: true });
+
+        document.addEventListener('touchmove', e => { 
+            if (e.touches.length === 1) e.preventDefault(); 
         }, { passive: false });
     </script>
 </body>
