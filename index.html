@@ -145,8 +145,10 @@
         }
 
         #sec-1-replicated .video-sub-container {
-            width: 80%; 
-            height: 80%;
+            width: 100%;
+            height: 100%;
+            max-width: 90%; /* 桌面端预留边距 */
+            max-height: 90%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -160,6 +162,11 @@
             object-position: center center;
             opacity: 0;
             transition: opacity 0.5s ease-in;
+        }
+
+        /* 确保第五页视频使用 contain 以免裁切 */
+        #sec-1-replicated .bg-asset {
+            object-fit: contain;
         }
 
         video.bg-asset.visible {
@@ -202,8 +209,8 @@
                 bottom: var(--mobile-gap);
             }
             #sec-1-replicated .video-sub-container {
-                width: 70%; 
-                height: 70%;
+                max-width: 85%; 
+                max-height: 85%;
             }
         }
     </style>
@@ -243,7 +250,7 @@
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9816-compressed.jpg');"></div>
             </section>
 
-            <!-- 第5页 -->
+            <!-- 第5页 (Walkman 视频页) -->
             <section class="section" id="sec-1-replicated">
                 <div class="video-container">
                     <div class="video-sub-container">
@@ -315,7 +322,6 @@
         const scrollContainer = document.getElementById('scroll-container');
         const sections = Array.from(document.querySelectorAll('.section'));
         
-        // 此处同步修改了编号：Index 0 设为 01，Index 2 设为 03
         const projectData = [
             { 
                 customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 01", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], 
