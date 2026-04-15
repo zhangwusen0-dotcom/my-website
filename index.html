@@ -217,7 +217,7 @@
         <div class="bottom-right-area ui-text" id="label-right"></div>
 
         <div class="scroll-container" id="scroll-container">
-            <!-- 01 -->
+            <!-- 01 第一页视频部分 -->
             <section class="section" id="sec-1">
                 <div class="top-overlay"></div>
                 <div class="video-container">
@@ -288,17 +288,23 @@
     </div>
 
     <script>
+        // ==========================================
+        // 第一页视频配置区域 (修改此处链接即可)
+        // ==========================================
         const HERO_VIDEO_CONFIG = {
-            desktop: "https://img.wusen.me/lazzen-video/1.mp4",
-            mobile: "https://img.wusen.me/lazzen-video/2-p.mp4" 
+            desktop: "https://img.wusen.me/lazzen-video/1.mp4", // 桌面端视频链接
+            mobile:  "https://https://img.wusen.me/lazzen-video/1-p.mp4" // 移动端视频链接
         };
 
         function setupHeroVideo() {
             const videoEl = document.getElementById('hero-video');
             if (!videoEl) return;
             const isMobile = window.innerWidth <= 768;
+            
+            // 根据屏幕宽度选择对应的视频路径
             const videoSrc = isMobile ? HERO_VIDEO_CONFIG.mobile : HERO_VIDEO_CONFIG.desktop;
             
+            // 只有当路径发生变化时才更新，避免 Resize 时重复加载
             if (videoEl.getAttribute('data-current-src') !== videoSrc) {
                 videoEl.innerHTML = `<source src="${videoSrc}" type="video/mp4">`;
                 videoEl.setAttribute('data-current-src', videoSrc);
@@ -444,6 +450,7 @@
             }, 800);
         }
 
+        // 初始执行视频检测
         setupHeroVideo();
         updateLabel(0);
         
@@ -452,6 +459,7 @@
             playVideo(0);
         });
 
+        // 窗口尺寸变化时重新检测环境并切换视频
         window.addEventListener('resize', setupHeroVideo);
 
         window.addEventListener('wheel', e => {
