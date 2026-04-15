@@ -28,7 +28,7 @@
             width: 100vw;
         }
 
-        /* 核心包装容器：桌面端直角，移动端圆角 */
+        /* 核心包装容器 */
         .page-wrapper {
             position: absolute;
             top: 0;
@@ -42,7 +42,6 @@
             transition: border-radius 0.5s ease;
         }
 
-        /* 移动端特定样式：加入圆角设计 */
         @media (max-width: 768px) {
             .page-wrapper {
                 border-radius: var(--global-radius);
@@ -58,27 +57,24 @@
             color: #fff;
             font-size: var(--base-font-size);
             letter-spacing: 0.05em;
-            transition: color 0.5s ease, opacity 0.5s ease, filter 0.5s ease;
+            transition: color 0.5s ease, opacity 0.5s ease;
             line-height: var(--base-line-height);
         }
 
-        /* 档案页激活时的样式 */
+        /* 针对白色背景的文字颜色强制设置 */
+        body.force-black .ui-text {
+            mix-blend-mode: normal;
+            color: #000000 !important;
+        }
+
         body.profile-active .ui-text {
             mix-blend-mode: normal;
             color: #000;
         }
 
-        /* 强制白色（针对深色背景且不适合混合模式的页面） */
         body.force-white .ui-text {
             mix-blend-mode: normal;
             color: #ffffff;
-        }
-
-        /* 强制反色：用于第五页白色背景但需要白色文字的需求 */
-        body.force-invert .ui-text {
-            mix-blend-mode: normal;
-            color: #000; /* 先设为黑 */
-            filter: invert(1); /* 彻底反转为白 */
         }
 
         .bottom-left-area {
@@ -212,12 +208,11 @@
 <body id="main-body">
 
     <div class="page-wrapper" id="page-wrapper">
-        <!-- UI 文字层：位于 wrapper 内部 -->
         <div class="bottom-left-area ui-text" id="label-left"></div>
         <div class="bottom-right-area ui-text" id="label-right"></div>
 
         <div class="scroll-container" id="scroll-container">
-            <!-- 01 第一页视频部分 -->
+            <!-- 第1页 -->
             <section class="section" id="sec-1">
                 <div class="top-overlay"></div>
                 <div class="video-container">
@@ -225,12 +220,12 @@
                 </div>
             </section>
 
-            <!-- 02 -->
+            <!-- 第2页 -->
             <section class="section" id="sec-2">
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/lazzen-if-gold.jpg');"></div>
             </section>
 
-            <!-- 03 -->
+            <!-- 第3页 -->
             <section class="section" id="sec-3">
                 <div class="top-overlay"></div>
                 <div class="video-container">
@@ -240,12 +235,12 @@
                 </div>
             </section>
 
-            <!-- 04 -->
+            <!-- 第4页 -->
             <section class="section" id="sec-4">
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9816-compressed.jpg');"></div>
             </section>
 
-            <!-- 05 -->
+            <!-- 第5页 (目标修改页) -->
             <section class="section" id="sec-1-replicated">
                 <div class="video-container">
                     <div class="video-sub-container">
@@ -256,72 +251,57 @@
                 </div>
             </section>
 
-            <!-- 06 -->
+            <!-- 更多页面... -->
             <section class="section" id="sec-4-copy">
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9805-compressed4.jpg');"></div>
             </section>
 
-            <!-- 07 -->
             <section class="section" id="sec-4-copy-replicated">
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_1428-compressed.jpg');"></div>
             </section>
 
-            <!-- 08 -->
             <section class="section" id="sec-5">
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/p6-leica-m-battery-charger-compressed2.jpg');"></div>
             </section>
 
-            <!-- 09 -->
             <section class="section" id="sec-6">
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/buds-compressed3.jpg');"></div>
             </section>
 
-            <!-- 10 -->
             <section class="section" id="sec-8">
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/topfront-20comparisoncc.jpg');"></div>
             </section>
 
-            <!-- 11 -->
             <section class="section" id="sec-profile">
             </section>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // 第一页视频配置区域 (修改此处链接即可)
-        // ==========================================
         const HERO_VIDEO_CONFIG = {
-            desktop: "https://img.wusen.me/lazzen-video/1.mp4", // 桌面端视频链接
-            mobile:  "https://img.wusen.me/lazzen-video/1-p.mp4" // 移动端视频链接
+            desktop: "https://img.wusen.me/lazzen-video/1.mp4",
+            mobile:  "https://img.wusen.me/lazzen-video/1-p.mp4" 
         };
 
         function setupHeroVideo() {
             const videoEl = document.getElementById('hero-video');
             if (!videoEl) return;
             const isMobile = window.innerWidth <= 768;
-            
-            // 根据屏幕宽度选择对应的视频路径
             const videoSrc = isMobile ? HERO_VIDEO_CONFIG.mobile : HERO_VIDEO_CONFIG.desktop;
             
-            // 只有当路径发生变化时才更新，避免 Resize 时重复加载
             if (videoEl.getAttribute('data-current-src') !== videoSrc) {
-                videoEl.pause(); // 先停止旧视频
+                videoEl.pause();
                 videoEl.innerHTML = `<source src="${videoSrc}" type="video/mp4">`;
                 videoEl.setAttribute('data-current-src', videoSrc);
                 videoEl.load();
                 
-                // 确保元数据加载后再处理播放，防止 AbortError
                 videoEl.onloadedmetadata = () => {
                     if (currentIndex === 0) {
                         const playPromise = videoEl.play();
                         if (playPromise !== undefined) {
                             playPromise.then(() => {
                                 videoEl.classList.add('visible');
-                            }).catch(error => {
-                                // 忽略静音自动播放政策导致的被拦截
-                                console.log("Hero video auto-play prevented:", error);
-                            });
+                            }).catch(error => console.log("Playback error:", error));
                         }
                     }
                 };
@@ -333,53 +313,18 @@
         const sections = Array.from(document.querySelectorAll('.section'));
         
         const projectData = [
-            { 
-                customLabels: [
-                    "PRODUCT: LAZZEN CIRCUIT BREAKER - 01",
-                    "TEAM ROLE: CREATIVE LEAD",
-                    "AWARD: iF GOLD AWARD",
-                    "STATUS: MASS PRODUCTION"
-                ],
-                bgColor: "#0a0a0a" 
-            },
-            { 
-                customLabels: [
-                    "PRODUCT: LAZZEN CIRCUIT BREAKER - 02",
-                    "TEAM ROLE: CREATIVE LEAD",
-                    "AWARD: iF GOLD AWARD",
-                    "STATUS: MASS PRODUCTION"
-                ],
-                bgColor: "#1a1a1a" 
-            },
-            { 
-                customLabels: [
-                    "PRODUCT: LAZZEN CIRCUIT BREAKER - 03",
-                    "TEAM ROLE: CREATIVE LEAD",
-                    "AWARD: iF GOLD AWARD",
-                    "STATUS: MASS PRODUCTION"
-                ],
-                bgColor: "#050505" 
-            },
-            { 
-                customLabels: [
-                    "Nagra SN, Walkman & TP-7 Inspired",
-                    "Music Player",
-                    "Personal Project",
-                    "Status: Under Development"
-                ],
-                bgColor: "#222222" 
-            },
+            { customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 01", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], bgColor: "#0a0a0a" },
+            { customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 02", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], bgColor: "#1a1a1a" },
+            { customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 03", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], bgColor: "#050505" },
+            { customLabels: ["Nagra SN, Walkman & TP-7 Inspired", "Music Player", "Personal Project", "Status: Under Development"], bgColor: "#222222" },
+            // 第五页配置
             { name: "LNM250M REPLICA", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "v19.1.0-CENTERED", bgColor: "#ffffff" },
             { name: "STOOL DESIGN STUDY (II)", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT", bgColor: "#121212" },
             { name: "STOOL DESIGN STUDY (II) COPY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT_REP", bgColor: "#0d0d0d" },
             { name: "ARCHIVE VISUALIZATION I", type: "Still Image / Product Render", team: "Author: DESIGN LAB", status: "STATIC_RENDER_01", bgColor: "#1f1f1f" },
             { name: "REMOTE RENDERING SYSTEM", type: "Technical Archive / Visualization", team: "Author: DESIGN LAB", status: "STATIC_RENDER_03", bgColor: "#141414" },
             { name: "FUTURE INTERFACE STUDY", type: "UI/UX / Interaction Concept", team: "Author: DESIGN LAB", status: "SYSTEM_IDLE_01", bgColor: "#000000" },
-            { 
-                isProfile: true,
-                bgColor: "#ffffff",
-                content: `Wencheng Zhang is a multi-award-winning industrial designer who has a passion for industrial design and excels at archetype-level creation. Currently based in Shanghai.`
-            }
+            { isProfile: true, bgColor: "#ffffff", content: `Wencheng Zhang is a multi-award-winning industrial designer who has a passion for industrial design and excels at archetype-level creation. Currently based in Shanghai.` }
         ];
 
         function updateLabel(index) {
@@ -389,24 +334,23 @@
             const rightContainer = document.getElementById('label-right');
             const currentSection = sections[index];
             
-            const targetColor = data.bgColor || "#000000";
-            currentSection.style.backgroundColor = targetColor;
+            currentSection.style.backgroundColor = data.bgColor || "#000000";
             
-            // 重置所有特殊类名
-            body.classList.remove('profile-active', 'force-white', 'force-invert');
+            // 重置状态
+            body.classList.remove('profile-active', 'force-white', 'force-black');
 
             const pageNum = (index + 1).toString().padStart(2, '0');
             const totalNum = sections.length.toString().padStart(2, '0');
 
             if (data.isProfile) {
                 body.classList.add('profile-active');
-                leftContainer.innerHTML = `<div style="max-width: 420px; text-transform: none; text-align: left;">${data.content}</div>`;
+                leftContainer.innerHTML = `<div style="max-width: 420px;">${data.content}</div>`;
                 rightContainer.innerHTML = ''; 
             } else {
-                // 特殊处理：第五页 (index 4) 使用反色
+                // 特殊处理：第5页设置为黑色文字
                 if (index === 4) {
-                    body.classList.add('force-invert');
-                } else if (index === 3 || targetColor === "#ffffff") {
+                    body.classList.add('force-black');
+                } else if (index === 3) {
                     body.classList.add('force-white');
                 }
                 
@@ -436,14 +380,8 @@
                 if (v) {
                     if (i === index) {
                         v.currentTime = 0;
-                        const playPromise = v.play();
-                        if (playPromise !== undefined) {
-                            playPromise.then(() => {
-                                v.classList.add('visible');
-                            }).catch(error => {
-                                console.log("Playback prevented:", error);
-                            });
-                        }
+                        const p = v.play();
+                        if (p !== undefined) p.then(() => v.classList.add('visible')).catch(() => {});
                     } else {
                         v.pause();
                         v.classList.remove('visible');
@@ -456,28 +394,17 @@
         function transitionTo(index) {
             if (isLocked || index < 0 || index >= sections.length || index === currentIndex) return;
             isLocked = true;
-
             currentIndex = index;
             scrollContainer.style.transform = `translateY(-${index * 100}%)`;
-
             updateLabel(index);
             playVideo(index);
-
-            setTimeout(() => {
-                isLocked = false;
-            }, 800);
+            setTimeout(() => { isLocked = false; }, 800);
         }
 
-        // 初始执行视频检测
         setupHeroVideo();
         updateLabel(0);
         
-        window.addEventListener('load', () => {
-            setupHeroVideo();
-            playVideo(0);
-        });
-
-        // 窗口尺寸变化时重新检测环境并切换视频
+        window.addEventListener('load', () => { setupHeroVideo(); playVideo(0); });
         window.addEventListener('resize', setupHeroVideo);
 
         window.addEventListener('wheel', e => {
@@ -492,20 +419,7 @@
             if (Math.abs(diff) > 50) transitionTo(diff > 0 ? currentIndex + 1 : currentIndex - 1);
         }, { passive: true });
 
-        // 全局一次性交互解锁播放（针对部分浏览器的策略）
-        document.addEventListener('click', () => {
-            const v = sections[currentIndex].querySelector('video');
-            if (v) {
-                const playPromise = v.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(() => {});
-                }
-            }
-        }, { once: true });
-
-        document.addEventListener('touchmove', e => { 
-            if (e.touches.length === 1) e.preventDefault(); 
-        }, { passive: false });
+        document.addEventListener('touchmove', e => { if (e.touches.length === 1) e.preventDefault(); }, { passive: false });
     </script>
 </body>
 </html>
