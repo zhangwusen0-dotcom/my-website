@@ -9,12 +9,12 @@
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400&display=swap');
 
         :root {
-            --bg-canvas: #000000; /* 圆角外的颜色 */
+            --bg-canvas: #000000; 
             --desktop-gap: 25px;
             --mobile-gap: 15px;
             --base-font-size: 11px;
             --base-line-height: 1.6;
-            --global-radius: 14px; /* 全局圆角尺寸 */
+            --global-radius: 12px; /* 圆角大小修改为 12PX */
         }
 
         body, html {
@@ -22,13 +22,13 @@
             padding: 0;
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden; 
-            background-color: var(--bg-canvas); /* 确保背景始终为黑 */
+            background-color: var(--bg-canvas); 
             height: 100vh;
             height: 100dvh;
             width: 100vw;
         }
 
-        /* 核心圆角容器：圆角矩形框以外的面积都是黑色 */
+        /* 核心包装容器：桌面端直角，移动端圆角 */
         .page-wrapper {
             position: absolute;
             top: 0;
@@ -36,17 +36,23 @@
             width: 100vw;
             height: 100dvh;
             background-color: #000;
-            border-radius: var(--global-radius);
             overflow: hidden;
             z-index: 1;
-            /* 强制硬件加速和裁剪 */
             transform: translateZ(0);
-            mask-image: radial-gradient(circle, white 100%, black 100%);
-            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            transition: border-radius 0.5s ease;
+        }
+
+        /* 移动端特定样式：加入圆角设计 */
+        @media (max-width: 768px) {
+            .page-wrapper {
+                border-radius: var(--global-radius);
+                mask-image: radial-gradient(circle, white 100%, black 100%);
+                -webkit-mask-image: -webkit-radial-gradient(white, black);
+            }
         }
 
         .ui-text {
-            position: absolute; /* 改为相对于 page-wrapper 定位 */
+            position: absolute; 
             z-index: 1000;
             mix-blend-mode: difference; 
             color: #fff;
@@ -107,7 +113,7 @@
             height: 100%;
             position: relative;
             overflow: hidden;
-            background-color: #000; /* 每个页面的默认底色 */
+            background-color: #000; 
             transition: background-color 0.8s ease;
         }
 
@@ -197,7 +203,7 @@
 <body id="main-body">
 
     <div class="page-wrapper" id="page-wrapper">
-        <!-- UI 文字层：现在位于 wrapper 内部，遵循圆角裁剪 -->
+        <!-- UI 文字层：位于 wrapper 内部 -->
         <div class="bottom-left-area ui-text" id="label-left"></div>
         <div class="bottom-right-area ui-text" id="label-right"></div>
 
@@ -356,7 +362,6 @@
             const rightContainer = document.getElementById('label-right');
             const currentSection = sections[index];
             
-            // 改变 Section 自身的底色
             const targetColor = data.bgColor || "#000000";
             currentSection.style.backgroundColor = targetColor;
             
