@@ -293,7 +293,7 @@
         // ==========================================
         const HERO_VIDEO_CONFIG = {
             desktop: "https://img.wusen.me/lazzen-video/1.mp4", // 桌面端视频链接
-            mobile:  "https://https://img.wusen.me/lazzen-video/1-p.mp4" // 移动端视频链接
+            mobile:  "https://img.wusen.me/lazzen-video/1-p.mp4" // 移动端视频链接
         };
 
         function setupHeroVideo() {
@@ -306,13 +306,25 @@
             
             // 只有当路径发生变化时才更新，避免 Resize 时重复加载
             if (videoEl.getAttribute('data-current-src') !== videoSrc) {
+                videoEl.pause(); // 先停止旧视频
                 videoEl.innerHTML = `<source src="${videoSrc}" type="video/mp4">`;
                 videoEl.setAttribute('data-current-src', videoSrc);
                 videoEl.load();
-                if (currentIndex === 0) {
-                    videoEl.play().catch(e => {});
-                    videoEl.classList.add('visible');
-                }
+                
+                // 确保元数据加载后再处理播放，防止 AbortError
+                videoEl.onloadedmetadata = () => {
+                    if (currentIndex === 0) {
+                        const playPromise = videoEl.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                videoEl.classList.add('visible');
+                            }).catch(error => {
+                                // 忽略静音自动播放政策导致的被拦截
+                                console.log("Hero video auto-play prevented:", error);
+                            });
+                        }
+                    }
+                };
             }
         }
 
@@ -424,8 +436,14 @@
                 if (v) {
                     if (i === index) {
                         v.currentTime = 0;
-                        v.play().catch(() => {});
-                        v.classList.add('visible');
+                        const playPromise = v.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                v.classList.add('visible');
+                            }).catch(error => {
+                                console.log("Playback prevented:", error);
+                            });
+                        }
                     } else {
                         v.pause();
                         v.classList.remove('visible');
@@ -474,9 +492,15 @@
             if (Math.abs(diff) > 50) transitionTo(diff > 0 ? currentIndex + 1 : currentIndex - 1);
         }, { passive: true });
 
+        // 全局一次性交互解锁播放（针对部分浏览器的策略）
         document.addEventListener('click', () => {
             const v = sections[currentIndex].querySelector('video');
-            if (v) v.play();
+            if (v) {
+                const playPromise = v.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {});
+                }
+            }
         }, { once: true });
 
         document.addEventListener('touchmove', e => { 
