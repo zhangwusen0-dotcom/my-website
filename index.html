@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Onibi - Technical Archive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -22,7 +22,11 @@
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden; 
             background-color: var(--bg-dark);
-            height: 100%;
+            /* 使用 dvh 确保在移动端动态适配工具栏，解决黑边问题 */
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            position: fixed; /* 防止 iOS 橡皮筋回弹效果 */
         }
 
         /* 通用底部文字样式 */
@@ -38,19 +42,16 @@
             line-height: var(--base-line-height);
         }
 
-        /* 个人简介页面的特殊状态：白底黑字 */
         body.profile-active .ui-text {
             mix-blend-mode: normal;
             color: #000;
         }
 
-        /* 深色背景页面的特殊状态：强制白字 */
         body.force-white .ui-text {
             mix-blend-mode: normal;
             color: #ffffff;
         }
 
-        /* 统一底部定位：所有底部 UI 共享同一个 bottom 基准线 */
         .bottom-left-area {
             left: var(--desktop-gap);
             bottom: var(--desktop-gap);
@@ -61,7 +62,6 @@
         .brand-name {
             position: fixed;
             right: var(--desktop-gap);
-            /* 计算：底部间距 + 3行文字的高度，使其对齐左侧第一行 */
             bottom: calc(var(--desktop-gap) + (var(--base-font-size) * var(--base-line-height) * 3)); 
             text-transform: uppercase;
             pointer-events: auto;
@@ -77,13 +77,14 @@
         .page-counter {
             position: fixed;
             right: var(--desktop-gap);
-            bottom: var(--desktop-gap); /* 与左侧 STATUS 行对齐 */
+            bottom: var(--desktop-gap);
         }
 
         .page-wrapper {
             position: relative;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
         }
 
@@ -93,26 +94,27 @@
             left: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s;
             will-change: transform, opacity;
             overflow: hidden;
             background-color: #000;
             opacity: 0;
-            transform: scale(0.98);
+            /* 初始状态不使用 scale，避免视觉缝隙，改用纯位移或透明度 */
+            transform: translateY(0); 
             z-index: 1;
             pointer-events: none;
         }
 
         .section.active {
             opacity: 1;
-            transform: scale(1);
+            transform: translateY(0);
             z-index: 10;
             pointer-events: auto;
         }
 
         .section.inactive {
             opacity: 0;
-            transform: scale(0.98);
             z-index: 1;
             pointer-events: none;
         }
@@ -199,7 +201,6 @@
             }
             .brand-name {
                 right: 20px;
-                /* 确保移动端公式一致 */
                 bottom: calc(var(--mobile-gap) + (var(--base-font-size) * var(--base-line-height) * 3));
             }
             .page-counter {
@@ -263,7 +264,7 @@
             <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9805-compressed4.jpg');"></div>
         </section>
 
-        <!-- 07 (插入的新复制页) -->
+        <!-- 07 -->
         <section class="section" id="sec-4-copy-replicated">
             <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_1428-compressed.jpg');"></div>
         </section>
@@ -283,7 +284,7 @@
             <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/topfront-20comparisoncc.jpg');"></div>
         </section>
 
-        <!-- 11 Profile -->
+        <!-- 11 -->
         <section class="section" id="sec-profile">
         </section>
     </div>
@@ -297,7 +298,7 @@
             document.getElementById('sec-4'),
             document.getElementById('sec-1-replicated'),
             document.getElementById('sec-4-copy'),
-            document.getElementById('sec-4-copy-replicated'), // 新增
+            document.getElementById('sec-4-copy-replicated'),
             document.getElementById('sec-5'),      
             document.getElementById('sec-6'),
             document.getElementById('sec-8'),
@@ -413,6 +414,12 @@
         }, { passive: true });
 
         document.addEventListener('click', () => playVideo(currentIndex), { once: true });
+        
+        // 禁止移动端的下拉刷新
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) return;
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
