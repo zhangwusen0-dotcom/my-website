@@ -120,7 +120,6 @@
             overflow: hidden;
             background-color: #000; 
             transition: background-color 0.8s ease;
-            /* 允许点击以触发翻页 */
             cursor: pointer;
         }
 
@@ -135,7 +134,7 @@
             top: 0;
             left: 0;
             overflow: hidden;
-            pointer-events: none; /* 让点击穿透到 section 层 */
+            pointer-events: none;
         }
 
         #sec-1-replicated .video-container {
@@ -173,7 +172,7 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            pointer-events: none; /* 让点击穿透 */
+            pointer-events: none;
         }
 
         #sec-4 .section-image-bg, 
@@ -216,20 +215,7 @@
         <div class="bottom-right-area ui-text" id="label-right"></div>
 
         <div class="scroll-container" id="scroll-container">
-            <!-- 第1页 -->
-            <section class="section" id="sec-1">
-                <div class="top-overlay"></div>
-                <div class="video-container">
-                    <video id="hero-video" class="bg-asset" muted loop playsinline preload="auto"></video>
-                </div>
-            </section>
-
-            <!-- 第2页 -->
-            <section class="section" id="sec-2">
-                <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/lazzen-if-gold.jpg');"></div>
-            </section>
-
-            <!-- 第3页 -->
+            <!-- 第1页 (原第3页内容) -->
             <section class="section" id="sec-3">
                 <div class="top-overlay"></div>
                 <div class="video-container">
@@ -239,12 +225,25 @@
                 </div>
             </section>
 
+            <!-- 第2页 -->
+            <section class="section" id="sec-2">
+                <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/lazzen-if-gold.jpg');"></div>
+            </section>
+
+            <!-- 第3页 (原第1页内容) -->
+            <section class="section" id="sec-1">
+                <div class="top-overlay"></div>
+                <div class="video-container">
+                    <video id="hero-video" class="bg-asset" muted loop playsinline preload="auto"></video>
+                </div>
+            </section>
+
             <!-- 第4页 -->
             <section class="section" id="sec-4">
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9816-compressed.jpg');"></div>
             </section>
 
-            <!-- 第5页 (目标修改页) -->
+            <!-- 第5页 -->
             <section class="section" id="sec-1-replicated">
                 <div class="video-container">
                     <div class="video-sub-container">
@@ -255,7 +254,7 @@
                 </div>
             </section>
 
-            <!-- 更多页面... -->
+            <!-- 其他页 -->
             <section class="section" id="sec-4-copy">
                 <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9805-compressed4.jpg');"></div>
             </section>
@@ -300,7 +299,7 @@
                 videoEl.load();
                 
                 videoEl.onloadedmetadata = () => {
-                    if (currentIndex === 0) {
+                    if (currentIndex === 2) {
                         const playPromise = videoEl.play();
                         if (playPromise !== undefined) {
                             playPromise.then(() => {
@@ -316,11 +315,24 @@
         const scrollContainer = document.getElementById('scroll-container');
         const sections = Array.from(document.querySelectorAll('.section'));
         
+        // 此处同步修改了编号：Index 0 设为 01，Index 2 设为 03
         const projectData = [
-            { customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 01", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], bgColor: "#0a0a0a" },
-            { customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 02", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], bgColor: "#1a1a1a" },
-            { customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 03", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], bgColor: "#050505" },
-            { customLabels: ["Nagra SN, Walkman & TP-7 Inspired", "Music Player", "Personal Project", "Status: Under Development"], bgColor: "#222222" },
+            { 
+                customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 01", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], 
+                bgColor: "#050505" 
+            },
+            { 
+                customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 02", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], 
+                bgColor: "#1a1a1a" 
+            },
+            { 
+                customLabels: ["PRODUCT: LAZZEN CIRCUIT BREAKER - 03", "TEAM ROLE: CREATIVE LEAD", "AWARD: iF GOLD AWARD", "STATUS: MASS PRODUCTION"], 
+                bgColor: "#0a0a0a" 
+            },
+            { 
+                customLabels: ["Nagra SN, Walkman & TP-7 Inspired", "Music Player", "Personal Project", "Status: Under Development"], 
+                bgColor: "#222222" 
+            },
             { name: "LNM250M REPLICA", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "v19.1.0-CENTERED", bgColor: "#ffffff" },
             { name: "STOOL DESIGN STUDY (II)", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT", bgColor: "#121212" },
             { name: "STOOL DESIGN STUDY (II) COPY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT_REP", bgColor: "#0d0d0d" },
@@ -339,7 +351,6 @@
             
             currentSection.style.backgroundColor = data.bgColor || "#000000";
             
-            // 重置状态
             body.classList.remove('profile-active', 'force-white', 'force-black');
 
             const pageNum = (index + 1).toString().padStart(2, '0');
@@ -352,7 +363,7 @@
             } else {
                 if (index === 4) {
                     body.classList.add('force-black');
-                } else if (index === 3) {
+                } else if (index === 3 || (index === 2 && data.bgColor === "#ffffff")) {
                     body.classList.add('force-white');
                 }
                 
@@ -403,19 +414,13 @@
             setTimeout(() => { isLocked = false; }, 800);
         }
 
-        // 处理点击屏幕上下部分触发翻页
         document.addEventListener('click', (e) => {
-            // 如果点击的是链接或交互元素，不触发全局翻页
             if (e.target.closest('.brand-link')) return;
-
             const height = window.innerHeight;
             const clickY = e.clientY;
-
             if (clickY < height / 2) {
-                // 点击上半部分：向上翻页
                 transitionTo(currentIndex - 1);
             } else {
-                // 点击下半部分：向下翻页
                 transitionTo(currentIndex + 1);
             }
         });
