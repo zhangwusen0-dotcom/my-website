@@ -1,434 +1,418 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.3">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onibi - Technical Archive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400&display=swap');
+
+        :root {
+            --bg-dark: #000000;
+            --desktop-gap: 40px;
+            --mobile-gap: 25px;
+            --base-font-size: 11px;
+            --base-line-height: 1.6;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden; 
+            background-color: var(--bg-dark);
+            height: 100%;
+        }
+
+        /* 通用底部文字样式 */
+        .ui-text {
+            position: fixed;
+            z-index: 1000;
+            pointer-events: none;
+            mix-blend-mode: difference; 
+            color: #fff;
+            font-size: var(--base-font-size);
+            letter-spacing: 0.05em;
+            transition: color 0.5s ease, opacity 0.5s ease;
+            line-height: var(--base-line-height);
+        }
+
+        /* 个人简介页面的特殊状态：白底黑字 */
+        body.profile-active .ui-text {
+            mix-blend-mode: normal;
+            color: #000;
+        }
+
+        /* 深色背景页面的特殊状态：强制白字 */
+        body.force-white .ui-text {
+            mix-blend-mode: normal;
+            color: #ffffff;
+        }
+
+        /* 统一底部定位：所有底部 UI 共享同一个 bottom 基准线 */
+        .bottom-left-area {
+            left: var(--desktop-gap);
+            bottom: var(--desktop-gap);
+            text-align: left;
+            max-width: 500px;
+        }
+
+        .brand-name {
+            position: fixed;
+            right: var(--desktop-gap);
+            /* 计算：底部间距 + 3行文字的高度，使其对齐左侧第一行 */
+            bottom: calc(var(--desktop-gap) + (var(--base-font-size) * var(--base-line-height) * 3)); 
+            text-transform: uppercase;
+            pointer-events: auto;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .brand-name:hover {
+            opacity: 0.7;
+        }
+
+        .page-counter {
+            position: fixed;
+            right: var(--desktop-gap);
+            bottom: var(--desktop-gap); /* 与左侧 STATUS 行对齐 */
+        }
+
+        .page-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s;
+            will-change: transform, opacity;
+            overflow: hidden;
+            background-color: #000;
+            opacity: 0;
+            transform: scale(0.98);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .section.active {
+            opacity: 1;
+            transform: scale(1);
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        .section.inactive {
+            opacity: 0;
+            transform: scale(0.98);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        #sec-profile {
+            background-color: #ffffff;
+        }
+
+        .video-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+
+        #sec-1-replicated .video-container {
+            padding: 60px; 
+            background-color: #ffffff; 
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sec-1-replicated .bg-asset {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .bg-asset {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
+        video.bg-asset.visible {
+            opacity: 1;
+        }
+
+        .section-image-bg {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        #sec-4 .section-image-bg, 
+        #sec-4-copy .section-image-bg,
+        #sec-4-copy-replicated .section-image-bg {
+            background-position: bottom center;
+        }
+
+        .top-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --base-font-size: 9px;
+            }
+            .ui-text {
+                bottom: var(--mobile-gap);
+            }
+            .bottom-left-area {
+                left: 20px;
+                bottom: var(--mobile-gap);
+                max-width: 70%;
+            }
+            .brand-name {
+                right: 20px;
+                /* 确保移动端公式一致 */
+                bottom: calc(var(--mobile-gap) + (var(--base-font-size) * var(--base-line-height) * 3));
+            }
+            .page-counter {
+                right: 20px;
+                bottom: var(--mobile-gap);
+            }
+            #sec-1-replicated .video-container {
+                padding: 30px; 
+            }
+        }
+    </style>
 </head>
-<body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="zh-CN"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Onibi - Technical Archive&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400&amp;display=swap');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>:root {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--bg-dark: #000000;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--desktop-gap: 40px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--mobile-gap: 25px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--base-font-size: 11px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--base-line-height: 1.6;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>body, html {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'JetBrains Mono', monospace;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--bg-dark);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* 通用底部文字样式 */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.ui-text {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: fixed;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 1000;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>mix-blend-mode: difference;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #fff;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: var(--base-font-size);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: 0.05em;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: color 0.5s ease, opacity 0.5s ease;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>line-height: var(--base-line-height);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* 个人简介页面的特殊状态：白底黑字 */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>body.profile-active .ui-text {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>mix-blend-mode: normal;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #000;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* 深色背景页面的特殊状态：强制白字 */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>body.force-white .ui-text {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>mix-blend-mode: normal;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #ffffff;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* 统一底部定位：所有底部 UI 共享同一个 bottom 基准线 */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.bottom-left-area {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>left: var(--desktop-gap);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>bottom: var(--desktop-gap);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: left;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 500px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.brand-name {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: fixed;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>right: var(--desktop-gap);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>/* 计算：底部间距 + 3行文字的高度，使其对齐左侧第一行 */</p>
-<p class="p1"><span class="Apple-converted-space">            </span>bottom: calc(var(--desktop-gap) + (var(--base-font-size) * var(--base-line-height) * 3));<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-transform: uppercase;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: auto;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-decoration: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.brand-name:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0.7;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.page-counter {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: fixed;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>right: var(--desktop-gap);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>bottom: var(--desktop-gap); /* 与左侧 STATUS 行对齐 */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.page-wrapper {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100vw;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.section {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100vw;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>will-change: transform, opacity;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: #000;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(0.98);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.section.active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(1);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 10;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: auto;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.section.inactive {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(0.98);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>#sec-profile {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: #ffffff;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.video-container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>#sec-1-replicated .video-container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 60px;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: #ffffff;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>#sec-1-replicated .bg-asset {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>object-fit: contain;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.bg-asset {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>object-fit: cover;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>object-position: center center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: opacity 0.5s ease-in;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>video.bg-asset.visible {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 1;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.section-image-bg {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-size: cover;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-position: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-repeat: no-repeat;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>#sec-4 .section-image-bg,<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>#sec-4-copy .section-image-bg,</p>
-<p class="p1"><span class="Apple-converted-space">        </span>#sec-4-copy-replicated .section-image-bg {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-position: bottom center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.top-overlay {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>height: 40%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 5;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>@media (max-width: 768px) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>:root {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>--base-font-size: 9px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.ui-text {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>bottom: var(--mobile-gap);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.bottom-left-area {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>left: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>bottom: var(--mobile-gap);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>max-width: 70%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.brand-name {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>right: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>/* 确保移动端公式一致 */</p>
-<p class="p1"><span class="Apple-converted-space">                </span>bottom: calc(var(--mobile-gap) + (var(--base-font-size) * var(--base-line-height) * 3));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.page-counter {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>right: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>bottom: var(--mobile-gap);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>#sec-1-replicated .video-container {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>padding: 30px;<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body id="main-body"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="bottom-left-area ui-text" id="label-container"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;a href="javascript:void(0)" class="brand-name ui-text" id="profile-link"&gt;&gt; Wencheng Zhang&lt;/a&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="page-counter ui-text" id="page-counter"&gt;01 / 11&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="page-wrapper" id="page-wrapper"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 01 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section active" id="sec-1"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="top-overlay"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="video-container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;video class="bg-asset" muted loop playsinline preload="auto"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;source src="https://img.wusen.me/lazzen-video/1.mp4" type="video/mp4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/video&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 02 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/lazzen-if-gold.jpg');"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 03 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="top-overlay"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="video-container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;video class="bg-asset" muted loop playsinline preload="auto"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;source src="https://img.wusen.me/lazzen-video/2-p.mp4" type="video/mp4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/video&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 04 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9816-compressed.jpg');"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 05 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-1-replicated"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="video-container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;video class="bg-asset" muted loop playsinline preload="auto"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;source src="https://img.wusen.me/lazzen-video/walkman.mp4" type="video/mp4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/video&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 06 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-4-copy"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9805-compressed4.jpg');"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 07 (插入的新复制页) --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-4-copy-replicated"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_1428-compressed.jpg');"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 08 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-5"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/p6-leica-m-battery-charger-compressed2.jpg');"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 09 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/buds-compressed3.jpg');"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 10 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/topfront-20comparisoncc.jpg');"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 11 Profile --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;section class="section" id="sec-profile"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let currentIndex = 0;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const sections = [</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-1'),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-2'),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-3'),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-4'),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-1-replicated'),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-4-copy'),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-4-copy-replicated'), // 新增</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-5'), <span class="Apple-converted-space">     </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-6'),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-8'),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('sec-profile')</p>
-<p class="p1"><span class="Apple-converted-space">        </span>];</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const projectData = [</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "LNM250M SMART BREAKER", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "SYNC_RUNNING_01" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "ONIBI ARCHIVE 01", type: "Portfolio Collection / Concept", team: "Author: DESIGN LAB", status: "v19.0.0-ALIGNED" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "EXPERIMENTAL MOTION", type: "Visual Research / 3D Animation", team: "Author: DESIGN LAB", status: "SYNC_RUNNING_02" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "STOOL DESIGN STUDY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "LNM250M REPLICA", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "v19.1.0-CENTERED" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "STOOL DESIGN STUDY (II)", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "STOOL DESIGN STUDY (II) COPY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT_REP" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "ARCHIVE VISUALIZATION I", type: "Still Image / Product Render", team: "Author: DESIGN LAB", status: "STATIC_RENDER_01" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "REMOTE RENDERING SYSTEM", type: "Technical Archive / Visualization", team: "Author: DESIGN LAB", status: "STATIC_RENDER_03" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ name: "FUTURE INTERFACE STUDY", type: "UI/UX / Interaction Concept", team: "Author: DESIGN LAB", status: "SYSTEM_IDLE_01" },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>isProfile: true,</p>
-<p class="p1"><span class="Apple-converted-space">                </span>content: `Wencheng Zhang is a multi-award-winning industrial designer who has a passion for industrial design and excels at archetype-level creation. Currently based in Shanghai.`</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>];</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function updateLabel(index) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const data = projectData[index];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const body = document.getElementById('main-body');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const profileLink = document.getElementById('profile-link');</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>body.classList.remove('profile-active', 'force-white');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (data.isProfile) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>body.classList.add('profile-active');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>profileLink.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('label-container').innerHTML = `</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style="max-width: 420px; text-transform: none; text-align: left;"&gt;${data.content}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (index === 3) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>body.classList.add('force-white');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>profileLink.style.display = 'block';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('label-container').innerHTML = `</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;PRODUCT: ${data.name}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;TYPE:<span class="Apple-converted-space">    </span>${data.type}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;TEAM:<span class="Apple-converted-space">    </span>${data.team}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;STATUS:<span class="Apple-converted-space">  </span>${data.status}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const pageNum = (index + 1).toString().padStart(2, '0');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const totalNum = sections.length.toString().padStart(2, '0');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('page-counter').innerText = `${pageNum} / ${totalNum}`;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>async function playVideo(index) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>sections.forEach(s =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const v = s.querySelector('video');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (v) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>v.pause();</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>v.classList.remove('visible');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>v.currentTime = 0;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const activeVideo = sections[index].querySelector('video');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (activeVideo) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>await activeVideo.play();</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>activeVideo.classList.add('visible');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>} catch (e) {}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>let isLocked = false;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function transitionTo(index) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (isLocked || index &lt; 0 || index &gt;= sections.length || index === currentIndex) return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>isLocked = true;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const prevIndex = currentIndex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>sections[prevIndex].classList.replace('active', 'inactive');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>sections[index].classList.replace('inactive', 'active');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>currentIndex = index;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>updateLabel(index);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>playVideo(index);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>isLocked = false;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, 800);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('profile-link').addEventListener('click', () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transitionTo(sections.length - 1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>sections.forEach((s, i) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (i !== 0) s.classList.add('inactive');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>updateLabel(0);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>window.addEventListener('load', () =&gt; playVideo(0));</p>
-<p class="p1"><span class="Apple-converted-space">        </span>window.addEventListener('wheel', e =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (Math.abs(e.deltaY) &lt; 30) return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transitionTo(e.deltaY &gt; 0 ? currentIndex + 1 : currentIndex - 1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}, { passive: true });</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>let startY = 0;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>window.addEventListener('touchstart', e =&gt; startY = e.touches[0].clientY, { passive: true });</p>
-<p class="p1"><span class="Apple-converted-space">        </span>window.addEventListener('touchend', e =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const diff = startY - e.changedTouches[0].clientY;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (Math.abs(diff) &gt; 50) transitionTo(diff &gt; 0 ? currentIndex + 1 : currentIndex - 1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}, { passive: true });</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>document.addEventListener('click', () =&gt; playVideo(currentIndex), { once: true });</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+<body id="main-body">
+
+    <div class="bottom-left-area ui-text" id="label-container"></div>
+    <a href="javascript:void(0)" class="brand-name ui-text" id="profile-link">> Wencheng Zhang</a>
+    <div class="page-counter ui-text" id="page-counter">01 / 11</div>
+
+    <div class="page-wrapper" id="page-wrapper">
+        <!-- 01 -->
+        <section class="section active" id="sec-1">
+            <div class="top-overlay"></div>
+            <div class="video-container">
+                <video class="bg-asset" muted loop playsinline preload="auto">
+                    <source src="https://img.wusen.me/lazzen-video/1.mp4" type="video/mp4">
+                </video>
+            </div>
+        </section>
+
+        <!-- 02 -->
+        <section class="section" id="sec-2">
+            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/lazzen-if-gold.jpg');"></div>
+        </section>
+
+        <!-- 03 -->
+        <section class="section" id="sec-3">
+            <div class="top-overlay"></div>
+            <div class="video-container">
+                <video class="bg-asset" muted loop playsinline preload="auto">
+                    <source src="https://img.wusen.me/lazzen-video/2-p.mp4" type="video/mp4">
+                </video>
+            </div>
+        </section>
+
+        <!-- 04 -->
+        <section class="section" id="sec-4">
+            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9816-compressed.jpg');"></div>
+        </section>
+
+        <!-- 05 -->
+        <section class="section" id="sec-1-replicated">
+            <div class="video-container">
+                <video class="bg-asset" muted loop playsinline preload="auto">
+                    <source src="https://img.wusen.me/lazzen-video/walkman.mp4" type="video/mp4">
+                </video>
+            </div>
+        </section>
+
+        <!-- 06 -->
+        <section class="section" id="sec-4-copy">
+            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_9805-compressed4.jpg');"></div>
+        </section>
+
+        <!-- 07 (插入的新复制页) -->
+        <section class="section" id="sec-4-copy-replicated">
+            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/img_1428-compressed.jpg');"></div>
+        </section>
+
+        <!-- 08 -->
+        <section class="section" id="sec-5">
+            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/p6-leica-m-battery-charger-compressed2.jpg');"></div>
+        </section>
+
+        <!-- 09 -->
+        <section class="section" id="sec-6">
+            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/buds-compressed3.jpg');"></div>
+        </section>
+
+        <!-- 10 -->
+        <section class="section" id="sec-8">
+            <div class="section-image-bg" style="background-image: url('https://img.wusen.me/2026/04/topfront-20comparisoncc.jpg');"></div>
+        </section>
+
+        <!-- 11 Profile -->
+        <section class="section" id="sec-profile">
+        </section>
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        const sections = [
+            document.getElementById('sec-1'),
+            document.getElementById('sec-2'),
+            document.getElementById('sec-3'),
+            document.getElementById('sec-4'),
+            document.getElementById('sec-1-replicated'),
+            document.getElementById('sec-4-copy'),
+            document.getElementById('sec-4-copy-replicated'), // 新增
+            document.getElementById('sec-5'),      
+            document.getElementById('sec-6'),
+            document.getElementById('sec-8'),
+            document.getElementById('sec-profile')
+        ];
+        
+        const projectData = [
+            { name: "LNM250M SMART BREAKER", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "SYNC_RUNNING_01" },
+            { name: "ONIBI ARCHIVE 01", type: "Portfolio Collection / Concept", team: "Author: DESIGN LAB", status: "v19.0.0-ALIGNED" },
+            { name: "EXPERIMENTAL MOTION", type: "Visual Research / 3D Animation", team: "Author: DESIGN LAB", status: "SYNC_RUNNING_02" },
+            { name: "STOOL DESIGN STUDY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02" },
+            { name: "LNM250M REPLICA", type: "Industrial Design / Motion", team: "Lazzen Hardware", status: "v19.1.0-CENTERED" },
+            { name: "STOOL DESIGN STUDY (II)", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT" },
+            { name: "STOOL DESIGN STUDY (II) COPY", type: "Furniture / Archetype Creation", team: "Author: DESIGN LAB", status: "STATIC_RENDER_02_ALT_REP" },
+            { name: "ARCHIVE VISUALIZATION I", type: "Still Image / Product Render", team: "Author: DESIGN LAB", status: "STATIC_RENDER_01" },
+            { name: "REMOTE RENDERING SYSTEM", type: "Technical Archive / Visualization", team: "Author: DESIGN LAB", status: "STATIC_RENDER_03" },
+            { name: "FUTURE INTERFACE STUDY", type: "UI/UX / Interaction Concept", team: "Author: DESIGN LAB", status: "SYSTEM_IDLE_01" },
+            { 
+                isProfile: true,
+                content: `Wencheng Zhang is a multi-award-winning industrial designer who has a passion for industrial design and excels at archetype-level creation. Currently based in Shanghai.`
+            }
+        ];
+
+        function updateLabel(index) {
+            const data = projectData[index];
+            const body = document.getElementById('main-body');
+            const profileLink = document.getElementById('profile-link');
+            
+            body.classList.remove('profile-active', 'force-white');
+
+            if (data.isProfile) {
+                body.classList.add('profile-active');
+                profileLink.style.display = 'none';
+                document.getElementById('label-container').innerHTML = `
+                    <div style="max-width: 420px; text-transform: none; text-align: left;">${data.content}</div>
+                `;
+            } else {
+                if (index === 3) {
+                    body.classList.add('force-white');
+                }
+                
+                profileLink.style.display = 'block';
+                document.getElementById('label-container').innerHTML = `
+                    <div>PRODUCT: ${data.name}</div>
+                    <div>TYPE:    ${data.type}</div>
+                    <div>TEAM:    ${data.team}</div>
+                    <div>STATUS:  ${data.status}</div>
+                `;
+            }
+
+            const pageNum = (index + 1).toString().padStart(2, '0');
+            const totalNum = sections.length.toString().padStart(2, '0');
+            document.getElementById('page-counter').innerText = `${pageNum} / ${totalNum}`;
+        }
+
+        async function playVideo(index) {
+            sections.forEach(s => {
+                const v = s.querySelector('video');
+                if (v) {
+                    v.pause();
+                    v.classList.remove('visible');
+                    v.currentTime = 0;
+                }
+            });
+
+            const activeVideo = sections[index].querySelector('video');
+            if (activeVideo) {
+                try {
+                    await activeVideo.play();
+                    activeVideo.classList.add('visible');
+                } catch (e) {}
+            }
+        }
+
+        let isLocked = false;
+        function transitionTo(index) {
+            if (isLocked || index < 0 || index >= sections.length || index === currentIndex) return;
+            isLocked = true;
+
+            const prevIndex = currentIndex;
+            sections[prevIndex].classList.replace('active', 'inactive');
+            sections[index].classList.replace('inactive', 'active');
+
+            currentIndex = index;
+            updateLabel(index);
+            playVideo(index);
+
+            setTimeout(() => {
+                isLocked = false;
+            }, 800);
+        }
+
+        document.getElementById('profile-link').addEventListener('click', () => {
+            transitionTo(sections.length - 1);
+        });
+
+        sections.forEach((s, i) => {
+            if (i !== 0) s.classList.add('inactive');
+        });
+
+        updateLabel(0);
+        window.addEventListener('load', () => playVideo(0));
+        window.addEventListener('wheel', e => {
+            if (Math.abs(e.deltaY) < 30) return;
+            transitionTo(e.deltaY > 0 ? currentIndex + 1 : currentIndex - 1);
+        }, { passive: true });
+
+        let startY = 0;
+        window.addEventListener('touchstart', e => startY = e.touches[0].clientY, { passive: true });
+        window.addEventListener('touchend', e => {
+            const diff = startY - e.changedTouches[0].clientY;
+            if (Math.abs(diff) > 50) transitionTo(diff > 0 ? currentIndex + 1 : currentIndex - 1);
+        }, { passive: true });
+
+        document.addEventListener('click', () => playVideo(currentIndex), { once: true });
+    </script>
 </body>
 </html>
