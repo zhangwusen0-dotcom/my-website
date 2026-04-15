@@ -11,10 +11,9 @@
         :root {
             --bg-dark: #000000;
             --desktop-gap: 40px;
-            --mobile-gap: 20px;
+            --mobile-gap: 25px;
             --base-font-size: 11px;
             --base-line-height: 1.6;
-            --mobile-radius: 14px;
         }
 
         body, html {
@@ -30,23 +29,13 @@
             transition: background-color 0.8s cubic-bezier(0.65, 0, 0.35, 1);
         }
 
-        /* 全局裁剪容器 */
+        /* 页面包装容器 - 已移除圆角裁剪逻辑 */
         .page-wrapper {
             position: relative;
             width: 100vw;
             height: 100dvh;
             overflow: hidden;
             z-index: 1;
-        }
-
-        @media (max-width: 768px) {
-            .page-wrapper {
-                border-radius: var(--mobile-radius);
-                mask-image: radial-gradient(circle, white 100%, black 100%);
-                -webkit-mask-image: -webkit-radial-gradient(white, black);
-                overflow: hidden;
-                transform: translateZ(0); 
-            }
         }
 
         .ui-text {
@@ -58,7 +47,6 @@
             letter-spacing: 0.05em;
             transition: color 0.5s ease, opacity 0.5s ease;
             line-height: var(--base-line-height);
-            word-wrap: break-word; /* 确保长单词或内容可以折行 */
         }
 
         body.profile-active .ui-text {
@@ -71,22 +59,18 @@
             color: #ffffff;
         }
 
-        /* 左下角区域 */
         .bottom-left-area {
             left: var(--desktop-gap);
             bottom: var(--desktop-gap);
             text-align: left;
             pointer-events: none;
-            max-width: 400px;
         }
 
-        /* 右下角区域 */
         .bottom-right-area {
             right: var(--desktop-gap);
             bottom: var(--desktop-gap);
             text-align: right;
             pointer-events: none;
-            max-width: 300px;
         }
 
         .brand-link {
@@ -187,18 +171,13 @@
         }
 
         @media (max-width: 768px) {
-            :root {
-                --base-font-size: 9px;
-            }
             .bottom-left-area {
                 left: var(--mobile-gap) !important; 
                 bottom: var(--mobile-gap) !important;
-                max-width: 48% !important; /* 限制宽度，防止重叠 */
             }
             .bottom-right-area {
                 right: var(--mobile-gap) !important;
                 bottom: var(--mobile-gap) !important;
-                max-width: 48% !important; /* 限制宽度，防止重叠 */
             }
             #sec-1-replicated .video-sub-container {
                 width: 70%; 
