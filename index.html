@@ -26,7 +26,6 @@
             height: 100dvh;
             width: 100vw;
             position: fixed; 
-            /* 背景颜色切换平滑动画 */
             transition: background-color 0.8s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
@@ -34,7 +33,6 @@
         .ui-text {
             position: fixed;
             z-index: 1000;
-            pointer-events: none;
             mix-blend-mode: difference; 
             color: #fff;
             font-size: var(--base-font-size);
@@ -53,32 +51,32 @@
             color: #ffffff;
         }
 
+        /* 左侧对齐容器 */
         .bottom-left-area {
             left: var(--desktop-gap);
             bottom: var(--desktop-gap);
             text-align: left;
-            max-width: 500px;
+            pointer-events: none;
         }
 
-        .brand-name {
-            position: fixed;
+        /* 右侧对称容器 */
+        .bottom-right-area {
             right: var(--desktop-gap);
-            bottom: calc(var(--desktop-gap) + (var(--base-font-size) * var(--base-line-height) * 3)); 
-            text-transform: uppercase;
+            bottom: var(--desktop-gap);
+            text-align: right;
+            pointer-events: none;
+        }
+
+        .brand-link {
             pointer-events: auto;
             cursor: pointer;
             text-decoration: none;
+            color: inherit;
             display: block;
         }
 
-        .brand-name:hover {
+        .brand-link:hover {
             opacity: 0.7;
-        }
-
-        .page-counter {
-            position: fixed;
-            right: var(--desktop-gap);
-            bottom: var(--desktop-gap);
         }
 
         .page-wrapper {
@@ -97,7 +95,6 @@
             transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s;
             will-change: transform, opacity;
             overflow: hidden;
-            /* 移除固定的黑色背景，允许继承 body 的动态背景色 */
             background-color: transparent;
             opacity: 0;
             transform: translateY(0); 
@@ -131,7 +128,6 @@
             overflow: hidden;
         }
 
-        /* 第五页特殊的间距页保持纯白 */
         #sec-1-replicated .video-container {
             padding: 60px; 
             background-color: #ffffff; 
@@ -191,19 +187,11 @@
             :root {
                 --base-font-size: 9px;
             }
-            .ui-text {
-                bottom: var(--mobile-gap);
-            }
             .bottom-left-area {
                 left: 20px;
                 bottom: var(--mobile-gap);
-                max-width: 70%;
             }
-            .brand-name {
-                right: 20px;
-                bottom: calc(var(--mobile-gap) + (var(--base-font-size) * var(--base-line-height) * 3));
-            }
-            .page-counter {
+            .bottom-right-area {
                 right: 20px;
                 bottom: var(--mobile-gap);
             }
@@ -215,17 +203,20 @@
 </head>
 <body id="main-body">
 
-    <div class="bottom-left-area ui-text" id="label-container"></div>
-    <a href="javascript:void(0)" class="brand-name ui-text" id="profile-link">> Wencheng Zhang</a>
-    <div class="page-counter ui-text" id="page-counter">01 / 11</div>
+    <!-- 左侧对称 UI -->
+    <div class="bottom-left-area ui-text" id="label-left"></div>
+
+    <!-- 右侧对称 UI -->
+    <div class="bottom-right-area ui-text" id="label-right"></div>
 
     <div class="page-wrapper" id="page-wrapper">
-        <!-- 01 -->
+        <!-- 01: 首页 (包含设备自适应视频) -->
         <section class="section active" id="sec-1">
             <div class="top-overlay"></div>
             <div class="video-container">
-                <video class="bg-asset" muted loop playsinline preload="auto">
-                    <source src="https://img.wusen.me/lazzen-video/1.mp4" type="video/mp4">
+                <!-- ID 为 hero-video，src 将通过 JS 根据设备类型加载 -->
+                <video id="hero-video" class="bg-asset" muted loop playsinline preload="auto">
+                    您的浏览器不支持 HTML5 视频。
                 </video>
             </div>
         </section>
@@ -290,6 +281,27 @@
     </div>
 
     <script>
+        // 第一页视频配置：分别为桌面端和移动端定义不同的源
+        const HERO_VIDEO_CONFIG = {
+            desktop: "https://img.wusen.me/lazzen-video/1.mp4", // 桌面端视频源
+            mobile: "https://img.wusen.me/lazzen-video/1-p.mp4"  // 移动端视频源 (示例，您可以替换为专门的竖屏视频)
+        };
+
+        function setupHeroVideo() {
+            const videoEl = document.getElementById('hero-video');
+            const isMobile = window.innerWidth <= 768;
+            
+            // 根据设备选择链接
+            const videoSrc = isMobile ? HERO_VIDEO_CONFIG.mobile : HERO_VIDEO_CONFIG.desktop;
+            
+            // 避免重复设置相同的源
+            if (videoEl.getAttribute('data-current-src') !== videoSrc) {
+                videoEl.innerHTML = `<source src="${videoSrc}" type="video/mp4">`;
+                videoEl.setAttribute('data-current-src', videoSrc);
+                videoEl.load(); // 重新加载视频源
+            }
+        }
+
         let currentIndex = 0;
         const sections = [
             document.getElementById('sec-1'),
@@ -326,36 +338,38 @@
         function updateLabel(index) {
             const data = projectData[index];
             const body = document.getElementById('main-body');
-            const profileLink = document.getElementById('profile-link');
+            const leftContainer = document.getElementById('label-left');
+            const rightContainer = document.getElementById('label-right');
             
-            // 动态切换背景颜色
             body.style.backgroundColor = data.bgColor || "#000000";
-            
             body.classList.remove('profile-active', 'force-white');
+
+            const pageNum = (index + 1).toString().padStart(2, '0');
+            const totalNum = sections.length.toString().padStart(2, '0');
 
             if (data.isProfile) {
                 body.classList.add('profile-active');
-                profileLink.style.display = 'none';
-                document.getElementById('label-container').innerHTML = `
+                leftContainer.innerHTML = `
                     <div style="max-width: 420px; text-transform: none; text-align: left;">${data.content}</div>
                 `;
+                rightContainer.innerHTML = ''; 
             } else {
-                if (index === 3) {
-                    body.classList.add('force-white');
-                }
+                if (index === 3) body.classList.add('force-white');
                 
-                profileLink.style.display = 'block';
-                document.getElementById('label-container').innerHTML = `
+                leftContainer.innerHTML = `
                     <div>PRODUCT: ${data.name}</div>
                     <div>TYPE:    ${data.type}</div>
                     <div>TEAM:    ${data.team}</div>
                     <div>STATUS:  ${data.status}</div>
                 `;
-            }
 
-            const pageNum = (index + 1).toString().padStart(2, '0');
-            const totalNum = sections.length.toString().padStart(2, '0');
-            document.getElementById('page-counter').innerText = `${pageNum} / ${totalNum}`;
+                rightContainer.innerHTML = `
+                    <a href="javascript:void(0)" class="brand-link" onclick="transitionTo(${sections.length - 1})">> WENCHENG ZHANG</a>
+                    <div>${pageNum} / ${totalNum}</div>
+                    <div>&nbsp;</div>
+                    <div>&nbsp;</div>
+                `;
+            }
         }
 
         async function playVideo(index) {
@@ -395,16 +409,19 @@
             }, 800);
         }
 
-        document.getElementById('profile-link').addEventListener('click', () => {
-            transitionTo(sections.length - 1);
-        });
-
+        // 初始化
+        setupHeroVideo();
         sections.forEach((s, i) => {
             if (i !== 0) s.classList.add('inactive');
         });
 
         updateLabel(0);
+        
         window.addEventListener('load', () => playVideo(0));
+        
+        // 监听视口变化（例如手机横屏切换）
+        window.addEventListener('resize', setupHeroVideo);
+
         window.addEventListener('wheel', e => {
             if (Math.abs(e.deltaY) < 30) return;
             transitionTo(e.deltaY > 0 ? currentIndex + 1 : currentIndex - 1);
